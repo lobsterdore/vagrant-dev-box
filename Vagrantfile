@@ -20,12 +20,23 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.network "forwarded_port", guest: 8002, host: 8002
   config.vm.network "forwarded_port", guest: 8003, host: 8003
   config.vm.network "forwarded_port", guest: 8004, host: 8004
+  config.vm.network "forwarded_port", guest: 8080, host: 8080
 
   config.vm.network "private_network", ip: "10.10.10.20"
   config.vm.hostname = "vagrant.dev-box.com"
 
+
+  config.hostmanager.enabled = true
+  config.hostmanager.manage_host = true
+  config.vm.define 'localhost-box' do |node|
+    node.vm.hostname = 'localhost'
+    node.vm.network :private_network, ip: '127.0.0.1'
+    node.hostmanager.aliases = %w(dev.spangleapi)
+  end
+
+
   config.vm.synced_folder "shared/", "/shared"
-  config.vm.synced_folder "puppet/files/", "/etc/puppet/files"
+  config.vm.synced_folder "puppet/files/", "/etc/puppet/files", :mount_options => ["dmode=777,fmode=777"]
 
   config.vm.provision "puppet" do |puppet|
     puppet.manifests_path = "puppet/manifests"
