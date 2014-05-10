@@ -28,6 +28,7 @@ file { "/etc/environment":
 	content => inline_template("
 		PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games
 		export PYTHONPATH=$PYTHONPATH:/shared/apps/python
+		export SPANGLE_CORE_CONFIG=/home/sites/config/spanglecore.cfg
 	")
 }
 
