@@ -4,21 +4,21 @@ exec { "apt-update":
 	refreshonly => true
 }
 
-package { [
-		"openjdk-6-jdk",
-	]:
-	ensure => "purged"
-}
+#package { [
+#		"openjdk-6-jdk",
+#	]:
+#	ensure => "purged"
+#}
 
 package { [
 		"vim",
-		"curl",
 		"build-essential",
 		"python-mysqldb",
 		"openjdk-7-jre",
 		"daemon",
 		"screen",
-		"git"
+		"git",
+		"unzip"
 	]:
 	ensure => "present",
 	require  => Exec['apt-update']
@@ -28,7 +28,7 @@ file { "/etc/environment":
 	content => inline_template("
 		PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games
 		export PYTHONPATH=$PYTHONPATH:/shared/apps/python
-		export SPANGLE_CORE_CONFIG=/home/sites/config/spanglecore.cfg
+		export LOBSTERCORE_CONFIG=/home/sites/config/lobstercore.cfg
 	")
 }
 
@@ -38,9 +38,56 @@ class { 'python':
 	pip => true
 }
 
-python::requirements { '/shared/apps/python/spanglecms/requirements.txt': }
+python::requirements { '/shared/apps/python/lobstercms/requirements.txt': }
 
-python::requirements { '/shared/apps/python/spanglecore/requirements.txt': }
+python::requirements { '/shared/apps/python/lobstercore/requirements.txt': }
+
+file { "/etc/supervisor":
+	ensure  => directory,
+	owner => 'root',
+	group => 'root',
+	mode => 0644
+}
+
+file { "/etc/supervisor/conf.d":
+	ensure  => directory,
+	owner => 'root',
+	group => 'root',
+	mode => 0644,
+	require => File['/etc/supervisor']
+}
+
+file { "/var/log/supervisor":
+	ensure  => directory,
+	owner => 'root',
+	group => 'root',
+	mode => 0644
+}
+
+file { "/etc/supervisor/supervisord.conf":
+	source => "puppet:///files/etc/supervisord.conf",
+	ensure  => file,
+	owner => 'root',
+	group => 'root',
+	mode => 0644,
+	require => File['/etc/supervisor']
+}
+
+file { "/etc/init.d/supervisor":
+	source => "puppet:///files/etc/init.d/supervisor",
+	ensure  => file,
+	owner => 'root',
+	group => 'root',
+	mode => 755
+}
+
+file { "/etc/default/supervisor":
+	source => "puppet:///files/etc/default/supervisor",
+	ensure  => file,
+	owner => 'root',
+	group => 'root',
+	mode => 0644
+}
 
 # horrible hack way of doing solr for now
 #file { "/usr/local/solr":
@@ -61,6 +108,11 @@ python::requirements { '/shared/apps/python/spanglecore/requirements.txt': }
 #	enable => true,
 #	require => File["/etc/init.d/solr"]
 #}
+
+class { 'solr':
+	mirror => 'http://apache.mesi.com.ar/lucene/solr',
+	version => '4.7.2'
+}
 
 class { '::mysql::server':
 	override_options => { 'mysqld' => { 'bind_address' => '0.0.0.0' } },
@@ -147,7 +199,7 @@ class { 'ruby':
 }
 
 class { 'nodejs':
-  version => 'stable',
+	version => 'stable',
 }
 
 package { 'grunt-cli':

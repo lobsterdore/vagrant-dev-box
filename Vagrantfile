@@ -6,9 +6,9 @@ VAGRANTFILE_API_VERSION = "2"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
-  config.vm.box = "precise64"
+  config.vm.box = "precise64-dev-box-2014-06-04"
 
-  config.vm.box_url = "http://files.vagrantup.com/precise64.box"
+  # config.vm.box_url = "http://files.vagrantup.com/precise64.box"
 
   # config.vm.box_check_update = false
 
@@ -20,6 +20,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.network "forwarded_port", guest: 8002, host: 8002
   config.vm.network "forwarded_port", guest: 8003, host: 8003
   config.vm.network "forwarded_port", guest: 8004, host: 8004
+  config.vm.network "forwarded_port", guest: 8005, host: 8005
   config.vm.network "forwarded_port", guest: 8080, host: 8080
 
   config.vm.network "private_network", ip: "10.10.10.20"
